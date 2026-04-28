@@ -8,8 +8,9 @@
 </head>
 <body>
   <header>
-    <h1>Bird Browser</h1>
-    <p class="tagline">Discover birds from around the world</p>
+    <button id="lang-toggle" class="lang-toggle" type="button">العربية</button>
+    <h1 id="title">Bird Browser</h1>
+    <p id="tagline" class="tagline">Discover birds from around the world</p>
     <div class="search-wrap">
       <input
         type="search"
@@ -27,9 +28,10 @@
   </main>
 
   <footer>
-    <p>Images from Wikimedia Commons.</p>
+    <p id="footer-text">Images from Wikimedia Commons.</p>
   </footer>
 
+  <script src="i18n.js"></script>
   <script src="birds.js"></script>
   <script src="app.js"></script>
 </body>
