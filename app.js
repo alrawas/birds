@@ -3,6 +3,40 @@
   const results = document.getElementById("results");
   const empty = document.getElementById("empty");
 
+  const PLACEHOLDER =
+    "data:image/svg+xml;utf8," +
+    encodeURIComponent(
+      `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 180">
+         <rect width="320" height="180" fill="#dbe7e0"/>
+         <text x="50%" y="50%" text-anchor="middle" dominant-baseline="middle"
+               font-family="sans-serif" font-size="48" fill="#74c69d">🐦</text>
+       </svg>`
+    );
+
+  const imageCache = new Map();
+
+  async function fetchImage(wikiTitle) {
+    if (imageCache.has(wikiTitle)) return imageCache.get(wikiTitle);
+    const promise = (async () => {
+      try {
+        const res = await fetch(
+          `https://en.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(wikiTitle)}`
+        );
+        if (!res.ok) return null;
+        const data = await res.json();
+        return (
+          (data.thumbnail && data.thumbnail.source) ||
+          (data.originalimage && data.originalimage.source) ||
+          null
+        );
+      } catch (e) {
+        return null;
+      }
+    })();
+    imageCache.set(wikiTitle, promise);
+    return promise;
+  }
+
   function escapeHtml(str) {
     return str
       .replace(/&/g, "&amp;")
@@ -37,7 +71,8 @@
       .map(
         (b) => `
         <article class="card">
-          <img src="${b.image}" alt="${escapeHtml(b.name)}" loading="lazy" />
+          <img src="${PLACEHOLDER}" data-wiki="${escapeHtml(b.wiki)}"
+               alt="${escapeHtml(b.name)}" loading="lazy" />
           <div class="card-body">
             <h2>${highlight(b.name, query)}</h2>
             <p class="scientific">${highlight(b.scientific, query)}</p>
@@ -49,6 +84,15 @@
       )
       .join("");
     empty.hidden = filtered.length !== 0;
+    loadImages();
+  }
+
+  function loadImages() {
+    results.querySelectorAll("img[data-wiki]").forEach(async (img) => {
+      const title = img.dataset.wiki;
+      const url = await fetchImage(title);
+      if (url) img.src = url;
+    });
   }
 
   let timer;
