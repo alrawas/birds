@@ -2,6 +2,10 @@
   const searchInput = document.getElementById("search");
   const results = document.getElementById("results");
   const empty = document.getElementById("empty");
+  const langToggle = document.getElementById("lang-toggle");
+  const titleEl = document.getElementById("title");
+  const taglineEl = document.getElementById("tagline");
+  const footerEl = document.getElementById("footer-text");
 
   const PLACEHOLDER =
     "data:image/svg+xml;utf8," +
@@ -12,6 +16,8 @@
                font-family="sans-serif" font-size="48" fill="#74c69d">🐦</text>
        </svg>`
     );
+
+  let lang = localStorage.getItem("birds.lang") === "ar" ? "ar" : "en";
 
   const imageCache = new Map();
 
@@ -56,32 +62,48 @@
   function matches(bird, query) {
     if (!query) return true;
     const q = query.toLowerCase();
+    const t = bird[lang];
     return (
-      bird.name.toLowerCase().includes(q) ||
+      t.name.toLowerCase().includes(q) ||
       bird.scientific.toLowerCase().includes(q) ||
-      bird.family.toLowerCase().includes(q) ||
-      bird.habitat.toLowerCase().includes(q) ||
-      bird.description.toLowerCase().includes(q)
+      t.family.toLowerCase().includes(q) ||
+      t.habitat.toLowerCase().includes(q) ||
+      t.description.toLowerCase().includes(q)
     );
   }
 
+  function applyChrome() {
+    const t = I18N[lang];
+    document.documentElement.lang = lang;
+    document.documentElement.dir = lang === "ar" ? "rtl" : "ltr";
+    document.title = t.title;
+    titleEl.textContent = t.title;
+    taglineEl.textContent = t.tagline;
+    searchInput.placeholder = t.placeholder;
+    empty.textContent = t.empty;
+    footerEl.textContent = t.footer;
+    langToggle.textContent = t.toggleTo;
+  }
+
   function render(query) {
+    const t = I18N[lang];
     const filtered = BIRDS.filter((b) => matches(b, query));
     results.innerHTML = filtered
-      .map(
-        (b) => `
+      .map((b) => {
+        const d = b[lang];
+        return `
         <article class="card">
           <img src="${PLACEHOLDER}" data-wiki="${escapeHtml(b.wiki)}"
-               alt="${escapeHtml(b.name)}" loading="lazy" />
+               alt="${escapeHtml(d.name)}" loading="lazy" />
           <div class="card-body">
-            <h2>${highlight(b.name, query)}</h2>
+            <h2>${highlight(d.name, query)}</h2>
             <p class="scientific">${highlight(b.scientific, query)}</p>
-            <p class="meta"><strong>Family:</strong> ${highlight(b.family, query)}</p>
-            <p class="meta"><strong>Habitat:</strong> ${highlight(b.habitat, query)}</p>
-            <p class="desc">${highlight(b.description, query)}</p>
+            <p class="meta"><strong>${t.family}:</strong> ${highlight(d.family, query)}</p>
+            <p class="meta"><strong>${t.habitat}:</strong> ${highlight(d.habitat, query)}</p>
+            <p class="desc">${highlight(d.description, query)}</p>
           </div>
-        </article>`
-      )
+        </article>`;
+      })
       .join("");
     empty.hidden = filtered.length !== 0;
     loadImages();
@@ -102,5 +124,13 @@
     timer = setTimeout(() => render(value), 80);
   });
 
+  langToggle.addEventListener("click", () => {
+    lang = lang === "en" ? "ar" : "en";
+    localStorage.setItem("birds.lang", lang);
+    applyChrome();
+    render(searchInput.value.trim());
+  });
+
+  applyChrome();
   render("");
 })();
