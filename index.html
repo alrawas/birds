@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Bird Browser</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <header>
+    <h1>Bird Browser</h1>
+    <p class="tagline">Discover birds from around the world</p>
+    <div class="search-wrap">
+      <input
+        type="search"
+        id="search"
+        placeholder="Search by name, family, or habitat..."
+        aria-label="Search birds"
+        autocomplete="off"
+      />
+    </div>
+  </header>
+
+  <main>
+    <section id="results" class="grid" aria-live="polite"></section>
+    <p id="empty" class="empty" hidden>No birds match your search.</p>
+  </main>
+
+  <footer>
+    <p>Images from Wikimedia Commons.</p>
+  </footer>
+
+  <script src="birds.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
